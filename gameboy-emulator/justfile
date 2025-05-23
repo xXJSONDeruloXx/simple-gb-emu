@@ -1,0 +1,3 @@
+run:
+    cd /Users/kurt/Developer/simple-gb-emu/gameboy-emulator && make
+    cd /Users/kurt/Developer/simple-gb-emu/gameboy-emulator && ./gameboy-emulator "roms/Tetris (World) (Rev 1).gb"

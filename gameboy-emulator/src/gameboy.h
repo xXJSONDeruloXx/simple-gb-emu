@@ -51,6 +51,8 @@ uint8_t input_get_joypad();
 // PPU functions
 void ppu_init();
 void ppu_update(uint16_t cycles);
+void ppu_render_frame();
+bool ppu_is_frame_ready();
 
 // Cartridge functions
 typedef struct {
