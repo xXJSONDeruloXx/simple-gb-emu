@@ -210,6 +210,7 @@ void ppu_render_frame() {
     printf("| Frame: %-6d                                   |\n", ppu.frame_count);
     printf("| Mode:  %-6d                                   |\n", ppu.mode);
     printf("| Line:  %-6d                                   |\n", ppu.line);
+    printf("| Controls: WASD=D-Pad K=A J=B N=Select M=Start |\n");
     printf("+------------------------------------------------+\n");
     
     // Reset frame_ready flag

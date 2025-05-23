@@ -12,6 +12,9 @@ volatile bool running = true;
 
 void signal_handler(int sig) {
     if (sig == SIGINT) {
+        // Restore terminal settings
+        input_cleanup();
+        
         // Reset terminal to normal state
         printf("\033[2J\033[H"); // Clear screen and move cursor to home
         printf("\033[?25h");     // Show cursor
@@ -47,7 +50,13 @@ int main(int argc, char *argv[]) {
     }
 
     printf("ROM loaded successfully. Starting emulation...\n");
-    printf("Press Ctrl+C to stop the emulator.\n");
+    printf("Press Ctrl+C to stop the emulator.\n\n");
+    printf("CONTROLS:\n");
+    printf("- D-Pad:          W (up), S (down), A (left), D (right)\n");
+    printf("- A Button:       K\n");
+    printf("- B Button:       J\n");
+    printf("- Select Button:  N\n");
+    printf("- Start Button:   M\n");
     
     // Setup terminal for ASCII display
     printf("\033[2J");    // Clear the screen
@@ -125,6 +134,7 @@ int main(int argc, char *argv[]) {
 
     // Cleanup
     cartridge_free();
+    input_cleanup();
     
     // Reset terminal to normal state
     printf("\033[2J\033[H"); // Clear screen and move cursor to home

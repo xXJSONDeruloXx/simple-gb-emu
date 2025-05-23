@@ -46,6 +46,7 @@ void timer_update(uint16_t cycles);
 // Input functions
 void input_init();
 void input_update();
+void input_cleanup();
 uint8_t input_get_joypad();
 
 // PPU functions
