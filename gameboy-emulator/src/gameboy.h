@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "logger.h"
 
 // Memory map constants
 #define MEMORY_SIZE 0x10000

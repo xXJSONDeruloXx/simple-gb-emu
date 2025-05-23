@@ -1,7 +1,12 @@
 // cpu.c - Game Boy CPU (Sharp LR35902) emulation
 #include "gameboy.h"
+#include "logger.h"
+#include <stdio.h>
 
 CPU_State cpu;
+
+// Function prototype for get_opcode_name (defined at the bottom of this file)
+const char* get_opcode_name(uint8_t opcode);
 
 void cpu_init() {
     // Initial register values for Game Boy after boot ROM
@@ -17,6 +22,12 @@ void cpu_init() {
     cpu.sp = 0xFFFE;
     cpu.halted = false;
     cpu.interrupts_enabled = false;
+    
+    LOG_INFO("CPU initialized. PC: 0x%04X, SP: 0x%04X", cpu.pc, cpu.sp);
+}
+
+void init_cpu() {
+    cpu_init();
 }
 
 uint8_t cpu_fetch_byte() {
@@ -44,11 +55,12 @@ void clear_flag(uint8_t flag) { cpu.f &= ~flag; }
 bool get_flag(uint8_t flag) { return (cpu.f & flag) != 0; }
 
 void cpu_execute_instruction() {
-    if (cpu.halted) {
-        return; // CPU is halted, do nothing
-    }
-
+    uint16_t current_pc = cpu.pc;  // Save for logging
     uint8_t opcode = cpu_fetch_byte();
+    
+    // Log instruction execution
+    LOG_DEBUG("PC: 0x%04X OP: 0x%02X (%s) A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X", 
+             current_pc, opcode, get_opcode_name(opcode), cpu.a, cpu.f, cpu.b, cpu.c, cpu.d, cpu.e, cpu.h, cpu.l, cpu.sp);
     
     switch (opcode) {
         case 0x00: // NOP
@@ -905,21 +917,139 @@ void cpu_execute_instruction() {
                    (cpu.a < value ? FLAG_C : 0);
             break;
         }
-        
-        case 0x76: // HALT
-            cpu.halted = true;
-            break;
-            
-        default:
-            printf("Unimplemented opcode: 0x%02X at PC: 0x%04X\n", opcode, cpu.pc - 1);
-            break;
     }
 }
 
 void execute_cpu_cycle() {
+    if (cpu.halted) {
+        // CPU is halted, do nothing
+        return;
+    }
+    
+    // Execute one instruction
     cpu_execute_instruction();
 }
 
-void init_cpu() {
-    cpu_init();
+// Function to get human-readable opcode names for debugging
+const char* get_opcode_name(uint8_t opcode) {
+    switch (opcode) {
+        case 0x00: return "NOP";
+        case 0x01: return "LD BC, d16";
+        case 0x02: return "LD (BC), A";
+        case 0x03: return "INC BC";
+        case 0x04: return "INC B";
+        case 0x05: return "DEC B";
+        case 0x06: return "LD B, d8";
+        case 0x07: return "RLCA";
+        case 0x08: return "LD (a16), SP";
+        case 0x09: return "ADD HL, BC";
+        case 0x0A: return "LD A, (BC)";
+        case 0x0B: return "DEC BC";
+        case 0x0C: return "INC C";
+        case 0x0D: return "DEC C";
+        case 0x0E: return "LD C, d8";
+        case 0x0F: return "RRCA";
+        case 0x11: return "LD DE, d16";
+        case 0x12: return "LD (DE), A";
+        case 0x13: return "INC DE";
+        case 0x14: return "INC D";
+        case 0x15: return "DEC D";
+        case 0x16: return "LD D, d8";
+        case 0x17: return "RLA";
+        case 0x18: return "JR r8";
+        case 0x19: return "ADD HL, DE";
+        case 0x1A: return "LD A, (DE)";
+        case 0x1B: return "DEC DE";
+        case 0x1C: return "INC E";
+        case 0x1D: return "DEC E";
+        case 0x1E: return "LD E, d8";
+        case 0x1F: return "RRA";
+        case 0x20: return "JR NZ, r8";
+        case 0x21: return "LD HL, d16";
+        case 0x22: return "LD (HL+), A";
+        case 0x23: return "INC HL";
+        case 0x24: return "INC H";
+        case 0x25: return "DEC H";
+        case 0x26: return "LD H, d8";
+        case 0x27: return "DAA";
+        case 0x28: return "JR Z, r8";
+        case 0x29: return "ADD HL, HL";
+        case 0x2A: return "LD A, (HL+)";
+        case 0x2C: return "INC L";
+        case 0x2F: return "CPL";
+        case 0x31: return "LD SP, d16";
+        case 0x32: return "LD (HL-), A";
+        case 0x35: return "DEC (HL)";
+        case 0x36: return "LD (HL), d8";
+        case 0x37: return "SCF";
+        case 0x3D: return "DEC A";
+        case 0x3E: return "LD A, d8";
+        case 0x44: return "LD B, H";
+        case 0x47: return "LD B, A";
+        case 0x4F: return "LD C, A";
+        case 0x56: return "LD D, (HL)";
+        case 0x57: return "LD D, A";
+        case 0x5E: return "LD E, (HL)";
+        case 0x5F: return "LD E, A";
+        case 0x67: return "LD H, A";
+        case 0x6F: return "LD L, A";
+        case 0x77: return "LD (HL), A";
+        case 0x78: return "LD A, B";
+        case 0x79: return "LD A, C";
+        case 0x7A: return "LD A, D";
+        case 0x7B: return "LD A, E";
+        case 0x7C: return "LD A, H";
+        case 0x7D: return "LD A, L";
+        case 0x7E: return "LD A, (HL)";
+        case 0x7F: return "LD A, A";
+        case 0x87: return "ADD A, A";
+        case 0xA1: return "AND C";
+        case 0xA7: return "AND A";
+        case 0xA9: return "XOR C";
+        case 0xAE: return "XOR (HL)";
+        case 0xAF: return "XOR A";
+        case 0xB0: return "OR B";
+        case 0xB1: return "OR C";
+        case 0xB7: return "OR A";
+        case 0xBE: return "CP (HL)";
+        case 0xC0: return "RET NZ";
+        case 0xC1: return "POP BC";
+        case 0xC2: return "JP NZ, a16";
+        case 0xC3: return "JP a16";
+        case 0xC5: return "PUSH BC";
+        case 0xC6: return "ADD A, d8";
+        case 0xC8: return "RET Z";
+        case 0xC9: return "RET";
+        case 0xCA: return "JP Z, a16";
+        case 0xCB: return "CB PREFIX";
+        case 0xCC: return "CALL Z, a16";
+        case 0xCD: return "CALL a16";
+        case 0xCE: return "ADC A, d8";
+        case 0xD0: return "RET NC";
+        case 0xD1: return "POP DE";
+        case 0xD2: return "JP NC, a16";
+        case 0xD4: return "CALL NC, a16";
+        case 0xD5: return "PUSH DE";
+        case 0xD6: return "SUB d8";
+        case 0xD8: return "RET C";
+        case 0xDA: return "JP C, a16";
+        case 0xDC: return "CALL C, a16";
+        case 0xDE: return "SBC A, d8";
+        case 0xE0: return "LDH (a8), A";
+        case 0xE1: return "POP HL";
+        case 0xE2: return "LD (C), A";
+        case 0xE5: return "PUSH HL";
+        case 0xE6: return "AND d8";
+        case 0xE9: return "JP (HL)";
+        case 0xEA: return "LD (a16), A";
+        case 0xEF: return "RST 28H";
+        case 0xF0: return "LDH A, (a8)";
+        case 0xF2: return "LD A, (C)";
+        case 0xF3: return "DI";
+        case 0xF5: return "PUSH AF";
+        case 0xFA: return "LD A, (a16)";
+        case 0xFB: return "EI";
+        case 0xFE: return "CP d8";
+        default: return "UNKNOWN";
+    }
 }

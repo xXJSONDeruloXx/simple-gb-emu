@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include "gameboy.h"
+#include "logger.h"
 
 // Game Boy screen dimensions (for terminal positioning)
 #define GB_SCREEN_HEIGHT 144
@@ -12,6 +13,9 @@ volatile bool running = true;
 
 void signal_handler(int sig) {
     if (sig == SIGINT) {
+        // Log the shutdown
+        LOG_INFO("Received interrupt signal, shutting down emulator");
+        
         // Restore terminal settings
         input_cleanup();
         
@@ -32,6 +36,13 @@ int main(int argc, char *argv[]) {
 
     // Set up signal handler for graceful shutdown
     signal(SIGINT, signal_handler);
+    
+    // Initialize the logger
+    if (!logger_init("emulator.log")) {
+        printf("Warning: Failed to initialize logger. Continuing without logging.\n");
+    } else {
+        LOG_INFO("Emulator starting up");
+    }
 
     printf("Simple Game Boy Emulator\n");
     printf("Loading ROM: %s\n", argv[1]);
@@ -98,6 +109,12 @@ int main(int argc, char *argv[]) {
             // Basic throttling to prevent runaway execution when debugging
             if (instruction_count % 5000 == 0) {
                 usleep(1);
+                
+                // Log summary every 1 million instructions
+                if (instruction_count % 1000000 == 0) {
+                    LOG_INFO("Executed %llu instructions, PC: 0x%04X, Frames: %llu", 
+                             instruction_count, cpu.pc, frames_rendered);
+                }
             }
         }
         
@@ -135,6 +152,13 @@ int main(int argc, char *argv[]) {
     // Cleanup
     cartridge_free();
     input_cleanup();
+    
+    // Log final statistics
+    LOG_INFO("Emulator stopped. Total instructions executed: %llu", instruction_count);
+    LOG_INFO("Total frames rendered: %llu", frames_rendered);
+    
+    // Close the logger
+    logger_close();
     
     // Reset terminal to normal state
     printf("\033[2J\033[H"); // Clear screen and move cursor to home
