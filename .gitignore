@@ -1,0 +1,100 @@
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+*.xcworkspace
+*.xcuserstate
+*.xcuserdata
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata
+*.pbxuser
+*.mode1v3
+*.mode2v3
+
+# Build artifacts
+/build/
+/bin/
+/obj/
+/out/
+/dist/
+/Debug/
+/Release/
+*.o
+*.obj
+*.so
+*.dll
+*.exe
+*.dylib
+*.a
+*.lib
+
+# C/C++ specific
+*.gcda
+*.gcno
+*.gcov
+*.gch
+*.pch
+*.suo
+*.idb
+*.pdb
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+*.old
+
+# IDEs and editors
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-workspace
+*.sublime-project
+
+# Python (if used for tooling)
+__pycache__/
+*.pyc
+*.pyo
+
+# Node (if used for tooling)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Test output
+/test-results/
+*.test
+
+# Emulator-specific
+*.sav
+*.state
+*.gbc
+*.gb
+*.gba
+*.sgb
+
+# User config
+*.user
+*.local
+*.env
+.env.*
+
+# Coverage
+coverage/
+*.lcov
+
+# Misc
+tags
+TAGS
+*.iml
+
+# Git
+.git/
+.gitmodules
+
+roms/
